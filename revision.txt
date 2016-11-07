@@ -1,1 +1,1 @@
-Revision 295: Added tag release-2.0.14 for changeset 62fc3433538d
+Revision 296: Fixed bug 3481 - Configure fails to detect dynamic library support on powerpc64le
