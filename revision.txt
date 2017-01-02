@@ -1,1 +1,1 @@
-Revision 297: Fixed warning about reserved macros with a leading underscore
+Revision 298: Updated copyright for 2017
