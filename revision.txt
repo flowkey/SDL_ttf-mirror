@@ -1,1 +1,1 @@
-Revision 299: Make sure we can link with OpenGL libraries in the OpenGL configure test
+Revision 300: Updated config.guess and config.sub
