@@ -1,1 +1,1 @@
-Revision 306: Allocate exactly the amount of space needed to convert to UTF-8
+Revision 307: Fixed bug 2801 - Improvement of Android build
