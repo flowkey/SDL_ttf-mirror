@@ -1,1 +1,1 @@
-Revision 302: Fixed spacing to match SDL code style
+Revision 303: Fixed bug 3762 - Can't render characters with codepoints greater than 2^16
