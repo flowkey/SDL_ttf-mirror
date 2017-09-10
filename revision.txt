@@ -1,1 +1,1 @@
-Revision 309: Fixed bug 3093 - Memory Leak in TTF_RenderUTF8_Blended_Wrapped
+Revision 310: Fixed bug 3491 - TTF_RenderText_Blended ignores alpha channel
