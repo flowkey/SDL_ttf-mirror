@@ -1,1 +1,1 @@
-Revision 301: Fixed buffer overflow with long font file names
+Revision 302: Fixed spacing to match SDL code style
