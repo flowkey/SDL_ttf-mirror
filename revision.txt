@@ -1,1 +1,1 @@
-Revision 310: Fixed bug 3491 - TTF_RenderText_Blended ignores alpha channel
+Revision 311: Fix for bug 3679 - TTF_RenderUTF8_Blended_Wrapped ignores lineSpace
