@@ -1,1 +1,1 @@
-Revision 300: Updated config.guess and config.sub
+Revision 301: Fixed buffer overflow with long font file names
