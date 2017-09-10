@@ -1,1 +1,1 @@
-Revision 307: Fixed bug 2801 - Improvement of Android build
+Revision 308: Fixed bug 2854 - Double definition + unused var
