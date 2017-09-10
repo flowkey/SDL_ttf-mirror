@@ -1,1 +1,1 @@
-Revision 304: Fixed whitespace
+Revision 305: Added patch note for emoji character support
