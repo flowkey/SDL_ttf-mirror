@@ -1,1 +1,1 @@
-Revision 312: Fixed bug 2749 - Invalid memory read & write by TTF_RenderUTF8* functions with specific input
+Revision 313: Fixed typo (thanks Tim!)
