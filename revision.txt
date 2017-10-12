@@ -1,1 +1,1 @@
-Revision 313: Fixed typo (thanks Tim!)
+Revision 314: Bye bye Visual Studio 2008
