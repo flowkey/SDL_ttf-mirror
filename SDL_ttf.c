@@ -1744,6 +1744,7 @@ SDL_Surface *TTF_RenderText_Blended(TTF_Font *font,
     return surface;
 }
 
+//XXX
 SDL_Surface *TTF_RenderUTF8_Blended(TTF_Font *font,
                 const char *text, SDL_Color fg)
 {
@@ -1926,9 +1927,7 @@ static SDL_bool CharacterIsDelimiter(char c, const char *delimiters)
 /* Don't define this until we have a release where we can change font rendering
 #define TTF_USE_LINESKIP
  */
-SDL_Surface *TTF_RenderUTF8_Blended_Wrapped(TTF_Font *font,
-                                    const char *text, SDL_Color fg, Uint32 wrapLength)
-{
+SDL_Surface *TTF_RenderUTF8_Blended_Wrapped(TTF_Font *font, const char *text, SDL_Color fg, Uint32 wrapLength) {
     int i;
     int xstart;
     int width, height;
@@ -2317,3 +2316,141 @@ int TTF_GetFontKerningSizeGlyphs(TTF_Font *font, Uint16 previous_ch, Uint16 ch)
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
+
+
+
+// custom render function for attributedString rendering
+SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, SDL_Color fg, SDL_Color *ac) {
+    int i;
+    int xstart;
+    int width, height;
+    SDL_Surface *textbuf;
+    Uint8 alpha;
+    Uint8 alpha_table[256];
+    Uint32 pixel;
+    Uint8 *src;
+    Uint32 *dst;
+    Uint32 *dst_check;
+    int row, col;
+    c_glyph *glyph;
+    FT_Error error;
+    FT_Long use_kerning;
+    FT_UInt prev_index = 0;
+    size_t textlen;
+    Uint32 charIndex = 0;
+
+    TTF_CHECKPOINTER(text, NULL);
+
+    /* Get the dimensions of the text surface */
+    if ((TTF_SizeUTF8(font, text, &width, &height) < 0) || !width) {
+        TTF_SetError("Text has zero width");
+        return(NULL);
+    }
+
+    /* Create the target surface */
+    textbuf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32,
+                                   0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    if (textbuf == NULL) {
+        return(NULL);
+    }
+
+    /* Adding bound checking to avoid all kinds of memory corruption errors
+     that may occur. */
+    dst_check = (Uint32*)textbuf->pixels + textbuf->pitch/4 * textbuf->h;
+
+    /* check kerning */
+    use_kerning = FT_HAS_KERNING(font->face) && font->kerning;
+
+    /* Support alpha blending */
+    if (!fg.a) {
+        fg.a = SDL_ALPHA_OPAQUE;
+    }
+    if (fg.a == SDL_ALPHA_OPAQUE) {
+        for (i = 0; i < SDL_arraysize(alpha_table); ++i) {
+            alpha_table[i] = (Uint8)i;
+        }
+    } else {
+        for (i = 0; i < SDL_arraysize(alpha_table); ++i) {
+            alpha_table[i] = (Uint8)(i * fg.a / 255);
+        }
+        SDL_SetSurfaceBlendMode(textbuf, SDL_BLENDMODE_BLEND);
+    }
+
+    /* Load and render each character */
+    textlen = SDL_strlen(text);
+    xstart = 0;
+    pixel = (fg.r<<16)|(fg.g<<8)|fg.b;
+    //SDL_FillRect(textbuf, NULL, pixel); /* Initialize with fg and 0 alpha */
+    while (textlen > 0) {
+        Uint32 c = UTF8_getch(&text, &textlen);
+        if (c == UNICODE_BOM_NATIVE || c == UNICODE_BOM_SWAPPED) {
+            continue;
+        }
+
+        error = Find_Glyph(font, c, CACHED_METRICS|CACHED_PIXMAP);
+        if (error) {
+            TTF_SetFTError("Couldn't find glyph", error);
+            SDL_FreeSurface(textbuf);
+            return NULL;
+        }
+        glyph = font->current;
+        /* Ensure the width of the pixmap is correct. On some cases,
+         * freetype may report a larger pixmap than possible.*/
+        width = glyph->pixmap.width;
+        if (font->outline <= 0 && width > glyph->maxx - glyph->minx) {
+            width = glyph->maxx - glyph->minx;
+        }
+        /* do kerning, if possible AC-Patch */
+        if (use_kerning && prev_index && glyph->index) {
+            FT_Vector delta;
+            FT_Get_Kerning(font->face, prev_index, glyph->index, ft_kerning_default, &delta);
+            xstart += delta.x >> 6;
+        }
+
+        for (row = 0; row < glyph->pixmap.rows; ++row) {
+            /* Make sure we don't go either over, or under the limit */
+            if ((xstart + glyph->minx) < 0) {
+                xstart -= (xstart + glyph->minx);
+            }
+            if ((row + glyph->yoffset) < 0) {
+                continue;
+            }
+            if ((row + glyph->yoffset) >= textbuf->h) {
+                continue;
+            }
+            dst = (Uint32 *)textbuf->pixels +
+            (row+glyph->yoffset) * textbuf->pitch/4 +
+            xstart + glyph->minx;
+            src = (Uint8*)glyph->pixmap.buffer + row * glyph->pixmap.pitch;
+            for (col = width; col > 0 && dst < dst_check; --col) {
+                alpha = *src++;
+
+                // Todo: get color
+                pixel = (ac->r<<16)|(ac->g<<8)|ac->b;
+                *dst++ |= pixel | ((Uint32)alpha_table[alpha] << 24);
+            }
+        }
+        ac++;
+
+        xstart += glyph->advance;
+        if (TTF_HANDLE_STYLE_BOLD(font)) {
+            xstart += font->glyph_overhang;
+        }
+        prev_index = glyph->index;
+    }
+
+    /* Handle the underline style */
+    if (TTF_HANDLE_STYLE_UNDERLINE(font)) {
+        row = TTF_underline_top_row(font);
+        TTF_drawLine_Blended(font, textbuf, row, pixel | (Uint32)fg.a << 24);
+    }
+
+    /* Handle the strikethrough style */
+    if (TTF_HANDLE_STYLE_STRIKETHROUGH(font)) {
+        row = TTF_strikethrough_top_row(font);
+        TTF_drawLine_Blended(font, textbuf, row, pixel | (Uint32)fg.a << 24);
+    }
+    return(textbuf);
+}
+
+
