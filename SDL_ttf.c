@@ -2425,7 +2425,6 @@ SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, 
             for (col = width; col > 0 && dst < dst_check; --col) {
                 alpha = *src++;
 
-                // Todo: get color
                 pixel = (ac->r<<16)|(ac->g<<8)|ac->b;
                 *dst++ |= pixel | ((Uint32)alpha_table[alpha] << 24);
             }
