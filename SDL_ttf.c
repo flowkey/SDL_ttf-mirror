@@ -2320,7 +2320,7 @@ int TTF_GetFontKerningSizeGlyphs(TTF_Font *font, Uint16 previous_ch, Uint16 ch)
 
 
 // custom render function for attributedString rendering
-SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, SDL_Color fg, SDL_Color *ac) {
+SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, SDL_Color *foregroundColorForCharacter) {
     int i;
     int xstart;
     int width, height;
@@ -2362,16 +2362,16 @@ SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, 
     use_kerning = FT_HAS_KERNING(font->face) && font->kerning;
 
     /* Support alpha blending */
-    if (!fg.a) {
-        fg.a = SDL_ALPHA_OPAQUE;
+    if (!foregroundColorForCharacter->a) {
+        foregroundColorForCharacter->a = SDL_ALPHA_OPAQUE;
     }
-    if (fg.a == SDL_ALPHA_OPAQUE) {
+    if (foregroundColorForCharacter->a == SDL_ALPHA_OPAQUE) {
         for (i = 0; i < SDL_arraysize(alpha_table); ++i) {
             alpha_table[i] = (Uint8)i;
         }
     } else {
         for (i = 0; i < SDL_arraysize(alpha_table); ++i) {
-            alpha_table[i] = (Uint8)(i * fg.a / 255);
+            alpha_table[i] = (Uint8)(i * foregroundColorForCharacter->a / 255);
         }
         SDL_SetSurfaceBlendMode(textbuf, SDL_BLENDMODE_BLEND);
     }
@@ -2379,7 +2379,7 @@ SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, 
     /* Load and render each character */
     textlen = SDL_strlen(text);
     xstart = 0;
-    pixel = (fg.r<<16)|(fg.g<<8)|fg.b;
+    //pixel = (foregroundColorForCharacter->r<<16)|(foregroundColorForCharacter->g<<8)|foregroundColorForCharacter->b;
     //SDL_FillRect(textbuf, NULL, pixel); /* Initialize with fg and 0 alpha */
     while (textlen > 0) {
         Uint32 c = UTF8_getch(&text, &textlen);
@@ -2425,11 +2425,11 @@ SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, 
             for (col = width; col > 0 && dst < dst_check; --col) {
                 alpha = *src++;
 
-                pixel = (ac->r<<16)|(ac->g<<8)|ac->b;
+                pixel = (foregroundColorForCharacter->r<<16)|(foregroundColorForCharacter->g<<8)|foregroundColorForCharacter->b;
                 *dst++ |= pixel | ((Uint32)alpha_table[alpha] << 24);
             }
         }
-        ac++;
+        foregroundColorForCharacter++;
 
         xstart += glyph->advance;
         if (TTF_HANDLE_STYLE_BOLD(font)) {
@@ -2441,13 +2441,13 @@ SDL_Surface *TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, 
     /* Handle the underline style */
     if (TTF_HANDLE_STYLE_UNDERLINE(font)) {
         row = TTF_underline_top_row(font);
-        TTF_drawLine_Blended(font, textbuf, row, pixel | (Uint32)fg.a << 24);
+        TTF_drawLine_Blended(font, textbuf, row, pixel | (Uint32)foregroundColorForCharacter->a << 24);
     }
 
     /* Handle the strikethrough style */
     if (TTF_HANDLE_STYLE_STRIKETHROUGH(font)) {
         row = TTF_strikethrough_top_row(font);
-        TTF_drawLine_Blended(font, textbuf, row, pixel | (Uint32)fg.a << 24);
+        TTF_drawLine_Blended(font, textbuf, row, pixel | (Uint32)foregroundColorForCharacter->a << 24);
     }
     return(textbuf);
 }
