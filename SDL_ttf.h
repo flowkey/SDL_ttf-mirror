@@ -232,7 +232,6 @@ extern DECLSPEC SDL_Surface * SDLCALL TTF_RenderUTF8_Blended_Wrapped(TTF_Font *f
 extern DECLSPEC SDL_Surface * SDLCALL TTF_RenderUNICODE_Blended_Wrapped(TTF_Font *font,
                 const Uint16 *text, SDL_Color fg, Uint32 wrapLength);
 
-
 /* Create a 32-bit ARGB surface and render the given glyph at high quality,
    using alpha blending to dither the font with the given color.
    The glyph is rendered without any padding or centering in the X

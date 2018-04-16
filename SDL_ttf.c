@@ -1744,7 +1744,6 @@ SDL_Surface *TTF_RenderText_Blended(TTF_Font *font,
     return surface;
 }
 
-//XXX
 SDL_Surface *TTF_RenderUTF8_Blended(TTF_Font *font,
                 const char *text, SDL_Color fg)
 {
@@ -1927,7 +1926,9 @@ static SDL_bool CharacterIsDelimiter(char c, const char *delimiters)
 /* Don't define this until we have a release where we can change font rendering
 #define TTF_USE_LINESKIP
  */
-SDL_Surface *TTF_RenderUTF8_Blended_Wrapped(TTF_Font *font, const char *text, SDL_Color fg, Uint32 wrapLength) {
+SDL_Surface *TTF_RenderUTF8_Blended_Wrapped(TTF_Font *font,
+                                    const char *text, SDL_Color fg, Uint32 wrapLength)
+{
     int i;
     int xstart;
     int width, height;
