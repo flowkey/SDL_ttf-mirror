@@ -24,13 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-#include FT_STROKER_H
-#include FT_GLYPH_H
-#include FT_TRUETYPE_IDS_H
-
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_ttf.h"
@@ -43,68 +36,6 @@
 /* Handy routines for converting from fixed point */
 #define FT_FLOOR(X) ((X & -64) / 64)
 #define FT_CEIL(X)  (((X + 63) & -64) / 64)
-
-#define CACHED_METRICS  0x10
-#define CACHED_BITMAP   0x01
-#define CACHED_PIXMAP   0x02
-
-/* Cached glyph information */
-typedef struct cached_glyph {
-    int stored;
-    FT_UInt index;
-    FT_Bitmap bitmap;
-    FT_Bitmap pixmap;
-    int minx;
-    int maxx;
-    int miny;
-    int maxy;
-    int yoffset;
-    int advance;
-    Uint16 cached;
-} c_glyph;
-
-/* The structure used to hold internal font information */
-struct _TTF_Font {
-    /* Freetype2 maintains all sorts of useful info itself */
-    FT_Face face;
-
-    /* We'll cache these ourselves */
-    int height;
-    int ascent;
-    int descent;
-    int lineskip;
-
-    /* The font style */
-    int face_style;
-    int style;
-    int outline;
-
-    /* Whether kerning is desired */
-    int kerning;
-
-    /* Extra width in glyph bounds for text styles */
-    int glyph_overhang;
-    float glyph_italics;
-
-    /* Information in the font for underlining */
-    int underline_offset;
-    int underline_height;
-
-    /* Cache for style-transformed glyphs */
-    c_glyph *current;
-    c_glyph cache[257]; /* 257 is a prime */
-
-    /* We are responsible for closing the font stream */
-    SDL_RWops *src;
-    int freesrc;
-    FT_Open_Args args;
-
-    /* For non-scalable formats, we must remember which font index size */
-    int font_size_family;
-
-    /* really just flags passed into FT_Load_Glyph */
-    int hinting;
-};
 
 /* Handle a style only if the font does not already handle it */
 #define TTF_HANDLE_STYLE_BOLD(font) (((font)->style & TTF_STYLE_BOLD) && \
