@@ -82,8 +82,75 @@ extern DECLSPEC const SDL_version * SDLCALL TTF_Linked_Version(void);
 */
 extern DECLSPEC void SDLCALL TTF_ByteSwappedUNICODE(int swapped);
 
-/* The internal structure containing font information */
-typedef struct _TTF_Font TTF_Font;
+#define CACHED_METRICS  0x10
+#define CACHED_BITMAP   0x01
+#define CACHED_PIXMAP   0x02
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+#include FT_STROKER_H
+#include FT_GLYPH_H
+#include FT_TRUETYPE_IDS_H
+
+
+/* Cached glyph information */
+typedef struct cached_glyph {
+    int stored;
+    FT_UInt index;
+    FT_Bitmap bitmap;
+    FT_Bitmap pixmap;
+    int minx;
+    int maxx;
+    int miny;
+    int maxy;
+    int yoffset;
+    int advance;
+    Uint16 cached;
+} c_glyph;
+
+/* The structure used to hold internal font information */
+typedef struct _TTF_Font {
+    /* Freetype2 maintains all sorts of useful info itself */
+    FT_Face face;
+
+    /* We'll cache these ourselves */
+    int height;
+    int ascent;
+    int descent;
+    int lineskip;
+
+    /* The font style */
+    int face_style;
+    int style;
+    int outline;
+
+    /* Whether kerning is desired */
+    int kerning;
+
+    /* Extra width in glyph bounds for text styles */
+    int glyph_overhang;
+    float glyph_italics;
+
+    /* Information in the font for underlining */
+    int underline_offset;
+    int underline_height;
+
+    /* Cache for style-transformed glyphs */
+    c_glyph *current;
+    c_glyph cache[257]; /* 257 is a prime */
+
+    /* We are responsible for closing the font stream */
+    SDL_RWops *src;
+    int freesrc;
+    FT_Open_Args args;
+
+    /* For non-scalable formats, we must remember which font index size */
+    int font_size_family;
+
+    /* really just flags passed into FT_Load_Glyph */
+    int hinting;
+} TTF_Font;
 
 /* Initialize the TTF engine - returns 0 if successful, -1 on error */
 extern DECLSPEC int SDLCALL TTF_Init(void);
@@ -266,6 +333,9 @@ extern DECLSPEC int TTF_GetFontKerningSize(TTF_Font *font, int prev_index, int i
 
 /* Get the kerning size of two glyphs */
 extern DECLSPEC int TTF_GetFontKerningSizeGlyphs(TTF_Font *font, Uint16 previous_ch, Uint16 ch);
+
+extern DECLSPEC Uint32 UTF8_getch(const char **src, size_t *srclen);
+extern DECLSPEC int Find_Glyph(TTF_Font* font, Uint32 ch, int want);
 
 /* We'll use SDL for reporting errors */
 #define TTF_SetError    SDL_SetError
