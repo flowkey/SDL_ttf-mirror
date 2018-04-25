@@ -283,8 +283,6 @@ extern DECLSPEC SDL_Surface * SDLCALL TTF_RenderUTF8_Blended(TTF_Font *font,
 extern DECLSPEC SDL_Surface * SDLCALL TTF_RenderUNICODE_Blended(TTF_Font *font,
                 const Uint16 *text, SDL_Color fg);
 
-extern DECLSPEC SDL_Surface * SDLCALL TTF_RenderAttributedUTF8_Blended(TTF_Font *font, const char *text, SDL_Color *foregroundColorForCharacter);
-
 
 /* Create a 32-bit ARGB surface and render the given text at high quality,
    using alpha blending to dither the font with the given color.
