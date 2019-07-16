@@ -522,7 +522,7 @@ static FT_Error Load_Glyph(TTF_Font *font, Uint32 idx, c_glyph *cached, int want
             cached->advance += font->glyph_overhang;
         }
         if (TTF_HANDLE_STYLE_ITALIC(font) && FT_IS_SCALABLE(face)) {
-            int bump = (int)SDL_ceilf(GLYPH_ITALICS * font->height);
+            int bump = (int)ceilf(GLYPH_ITALICS * font->height);
             cached->maxx += bump;
         }
 
