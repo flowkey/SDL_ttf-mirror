@@ -1,6 +1,6 @@
 /*
   SDL_ttf:  A companion library to SDL for working with TrueType (tm) fonts
-  Copyright (C) 2001-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 2001-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -43,7 +43,7 @@ extern "C" {
 */
 #define SDL_TTF_MAJOR_VERSION   2
 #define SDL_TTF_MINOR_VERSION   0
-#define SDL_TTF_PATCHLEVEL      14
+#define SDL_TTF_PATCHLEVEL      15
 
 /* This macro can be used to fill a version structure with the compile-time
  * version of the SDL_ttf library.
@@ -60,6 +60,18 @@ extern "C" {
 #define TTF_MINOR_VERSION   SDL_TTF_MINOR_VERSION
 #define TTF_PATCHLEVEL      SDL_TTF_PATCHLEVEL
 #define TTF_VERSION(X)      SDL_TTF_VERSION(X)
+
+/**
+ *  This is the version number macro for the current SDL_ttf version.
+ */
+#define SDL_TTF_COMPILEDVERSION \
+    SDL_VERSIONNUM(SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_PATCHLEVEL)
+
+/**
+ *  This macro will evaluate to true if compiled with SDL_ttf at least X.Y.Z.
+ */
+#define SDL_TTF_VERSION_ATLEAST(X, Y, Z) \
+    (SDL_TTF_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z))
 
 /* Make sure this is defined (only available in newer SDL versions) */
 #ifndef SDL_DEPRECATED
@@ -106,7 +118,7 @@ typedef struct cached_glyph {
     int maxy;
     int yoffset;
     int advance;
-    Uint16 cached;
+    SDL_bool is_cached;
 } c_glyph;
 
 /* The structure used to hold internal font information */
@@ -127,14 +139,17 @@ typedef struct _TTF_Font {
 
     /* Whether kerning is desired */
     int kerning;
+    int use_kerning;
 
     /* Extra width in glyph bounds for text styles */
     int glyph_overhang;
-    float glyph_italics;
 
     /* Information in the font for underlining */
     int underline_offset;
     int underline_height;
+
+    int underline_top_row;
+    int strikethrough_top_row;
 
     /* Cache for style-transformed glyphs */
     c_glyph *current;
@@ -144,9 +159,6 @@ typedef struct _TTF_Font {
     SDL_RWops *src;
     int freesrc;
     FT_Open_Args args;
-
-    /* For non-scalable formats, we must remember which font index size */
-    int font_size_family;
 
     /* really just flags passed into FT_Load_Glyph */
     int hinting;
