@@ -34,6 +34,13 @@
 #include "SDL.h"
 #include "begin_code.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+#include FT_STROKER_H
+#include FT_GLYPH_H
+#include FT_TRUETYPE_IDS_H
+
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
 extern "C" {
@@ -97,14 +104,6 @@ extern DECLSPEC void SDLCALL TTF_ByteSwappedUNICODE(int swapped);
 #define CACHED_METRICS  0x10
 #define CACHED_BITMAP   0x01
 #define CACHED_PIXMAP   0x02
-
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
-#include FT_STROKER_H
-#include FT_GLYPH_H
-#include FT_TRUETYPE_IDS_H
-
 
 /* Cached glyph information */
 typedef struct cached_glyph {
